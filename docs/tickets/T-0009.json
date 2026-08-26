@@ -2,15 +2,21 @@
   "id": "T-0009",
   "titulo": "Formalizar el modelo de dominio en tipos",
   "descripcion": "Traducir docs/01-modelo-dominio.md a tipos TypeScript concretos, incluyendo la decision de migracion de esquema (I9).",
-  "estado": "pendiente",
-  "asignadoA": null,
+  "estado": "en_progreso",
+  "asignadoA": "Marga",
   "dependeDe": [
     "T-0001",
     "T-0002",
     "T-0004",
     "T-0008"
   ],
-  "comentarios": [],
+  "comentarios": [
+    {
+      "autor": "Nico",
+      "texto": "Entra en sprint 4, solo: primer ticket que produce codigo real de nido. Revision adversarial de Efra antes de cerrar, no en paralelo (nueva regla de proceso desde retro de sprint 1).",
+      "fecha": "2026-08-26T06:41:02.258Z"
+    }
+  ],
   "creadoEn": "2026-08-26T05:51:51.405Z",
-  "actualizadoEn": "2026-08-26T05:51:51.405Z"
+  "actualizadoEn": "2026-08-26T06:41:02.258Z"
 }
