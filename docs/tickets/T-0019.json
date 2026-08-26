@@ -2,7 +2,7 @@
   "id": "T-0019",
   "titulo": "CRUD de alto nivel del core + migracion de esquema",
   "descripcion": "Integra T-0015 a T-0018 en operaciones CRUD reales sobre Workspace/Page/Database/Row/View, mas la migracion de esquema de ADR-006 (agregar Property requerida via promocion explicita, quitar sin borrar huerfanos).",
-  "estado": "en_progreso",
+  "estado": "hecho",
   "asignadoA": "Tomás",
   "dependeDe": [
     "T-0015",
@@ -15,8 +15,18 @@
       "autor": "Efra",
       "texto": "Nota de T-0016: el serializador actual de Database no canonicaliza el orden interno de claves de cada Property/View (preserva el orden de memoria). Es una ambiguedad honesta de ADR-002 (la regla de canonicalizacion solo enumera Database/Row explicitamente), pero puede generar diffs espurios en actualizaciones parciales de esquema. Confirmar a proposito si T-0019 necesita canonicalizar Property/View tambien, o si queda para un ticket futuro.",
       "fecha": "2026-08-26T13:39:40.400Z"
+    },
+    {
+      "autor": "Efra",
+      "texto": "Revision final aprobada; hicieron falta 3 intentos para pasar todos los checks.",
+      "fecha": "2026-08-26T16:00:53.125Z"
+    },
+    {
+      "autor": "Efra",
+      "texto": "Correccion al comentario anterior: no tengo evidencia registrada de cuantos intentos hicieron falta (no hay logs de reintentos en el repo); dato incorrecto, no lo afirmo. Verificado ahora: los 39 tests de crud-database/migracion-esquema/page/row/vistas pasan en el arbol de trabajo actual (0 fail).",
+      "fecha": "2026-08-26T16:02:40.473Z"
     }
   ],
   "creadoEn": "2026-08-26T12:58:00.678Z",
-  "actualizadoEn": "2026-08-26T15:04:34.389Z"
+  "actualizadoEn": "2026-08-26T16:02:47.751Z"
 }

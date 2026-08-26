@@ -158,6 +158,63 @@ async function clasificarJson(raizWorkspace: string, pathRelativo: string): Prom
 }
 
 // ---------------------------------------------------------------------------
+// Filas crudas de una Database puntual, SIN validación de esquema (T-0019)
+// ---------------------------------------------------------------------------
+
+/**
+ * Todas las Rows del árbol cuyo `parent_id` (tal como aparece en el archivo)
+ * es igual a `databaseId` — parseo estructural vía `clasificarJson` (JSON
+ * válido, forma de Row, id-vs-filename: puntos 2/3/4 del checklist) pero
+ * **sin** aplicar `validarRow` contra ningún esquema (punto 8). A propósito:
+ * `construirIndice` excluye de `filas` toda Row con un error fatal contra el
+ * esquema ACTUAL de su Database, sin importar si ese error tiene algo que
+ * ver con la Property que se está consultando — correcto para su propio
+ * consumidor (resolver una View/consulta no debe mostrar una Row inválida),
+ * pero incorrecto para las dos preguntas de migración de ADR-006
+ * ("¿la Database tiene alguna Row?", "¿todas las Rows tienen valor para esta
+ * Property?"), que son sobre las Rows tal como existen en disco.
+ *
+ * Este es el fix del hallazgo de revisión de T-0019: sin esta función,
+ * `agregarProperty`/`promoverPropertyARequerida` (`../crud/database.ts`)
+ * contaban Rows vía `construirIndice`, así que una Row real pero excluida
+ * del índice por una razón AJENA a la Property en cuestión (por ejemplo, un
+ * `PropertyValue` huérfano de OTRA Property que pasó a tener `TIPO_INVALIDO`
+ * tras un `quitarProperty` + re-`agregarProperty` con el mismo id pero otro
+ * tipo — una secuencia legítima de la API pública, no manipulación de
+ * archivos) se volvía invisible: `agregarProperty` podía agregar una
+ * Property requerida a una Database que en los hechos tenía Rows, y
+ * `promoverPropertyARequerida` podía marcar una Property como requerida
+ * aunque una Row real nunca hubiera tenido valor para ella — exactamente lo
+ * que ADR-006 dice que debe fallar.
+ *
+ * No excluye por id duplicado entre archivos (a diferencia de
+ * `construirIndice`): esta función no construye un índice global de todo el
+ * árbol, solo responde "¿qué archivos de Row dicen pertenecer a esta
+ * Database, y qué `valores` tienen?" — un id duplicado entre dos Rows es un
+ * problema de integridad global que `construirIndice`/T-0018 ya reporta por
+ * su cuenta; para las dos preguntas de ADR-006 que consume esta función,
+ * ambos archivos "existen" en disco y ambos cuentan (subestimar sería el
+ * mismo error que se está corrigiendo).
+ */
+export async function listarFilasCrudasDeDatabase(
+  raizWorkspace: string,
+  databaseId: string,
+): Promise<NodoIndexado<Row>[]> {
+  const candidatos = await listarCandidatos(raizWorkspace);
+  const filas: NodoIndexado<Row>[] = [];
+
+  for (const candidato of candidatos) {
+    if (candidato.extension !== "json") continue;
+    const clasificado = await clasificarJson(raizWorkspace, candidato.pathRelativo);
+    if (clasificado.tipo !== "fila") continue;
+    if (clasificado.row.parentId !== databaseId) continue;
+    filas.push({ valor: clasificado.row, path: candidato.pathRelativo });
+  }
+
+  return filas;
+}
+
+// ---------------------------------------------------------------------------
 // Punto 6: resolución (en cascada) de parent_id para Page + Database
 // ---------------------------------------------------------------------------
 

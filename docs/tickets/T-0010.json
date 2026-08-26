@@ -2,13 +2,19 @@
   "id": "T-0010",
   "titulo": "Core de nido (libreria)",
   "descripcion": "Crear/leer/actualizar paginas y bases, propiedades tipadas, filas, views con filtro y orden. Sin CLI todavia.",
-  "estado": "pendiente",
+  "estado": "hecho",
   "asignadoA": null,
   "dependeDe": [
     "T-0009",
     "T-0019"
   ],
-  "comentarios": [],
+  "comentarios": [
+    {
+      "autor": "Nico",
+      "texto": "Cierra: sus 5 sub-tickets (T-0015 a T-0019) estan todos hecho.",
+      "fecha": "2026-08-26T16:02:54.195Z"
+    }
+  ],
   "creadoEn": "2026-08-26T05:51:57.360Z",
-  "actualizadoEn": "2026-08-26T12:58:00.740Z"
+  "actualizadoEn": "2026-08-26T16:02:59.833Z"
 }
