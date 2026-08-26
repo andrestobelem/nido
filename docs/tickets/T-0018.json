@@ -2,7 +2,7 @@
   "id": "T-0018",
   "titulo": "Indice derivado en bun:sqlite",
   "descripcion": "Construir/reconstruir el indice desde los archivos del arbol (ADR-001): nunca fuente de verdad, siempre reconstruible. Resolver Views contra el indice via WHERE/ORDER BY, traduciendo el arbol Grupo/CondicionHoja de ADR-004 (profundidad 2, operadores por familia de tipo) a SQL.",
-  "estado": "en_progreso",
+  "estado": "hecho",
   "asignadoA": "Marga",
   "dependeDe": [],
   "comentarios": [
@@ -10,8 +10,13 @@
       "autor": "Efra",
       "texto": "Notas de T-0017 para tener en cuenta: (1) un symlink circular en confinamiento.ts escapa como Error crudo con code ELOOP en vez de un tipo tipado (severidad baja, no es bypass de seguridad). (2) escritura.ts autocrea subdirectorios no declarados del path temporal en silencio (Bun.write lo hace por defecto) - no viola ningun ADR pero puede enmascarar un path mal construido. Ninguno bloqueante, confirmar si el indice necesita blindarse contra esto.",
       "fecha": "2026-08-26T14:22:08.992Z"
+    },
+    {
+      "autor": "Efra",
+      "texto": "Revision final OK; hicieron falta 3 intentos para pasar los tests.",
+      "fecha": "2026-08-26T15:02:26.287Z"
     }
   ],
   "creadoEn": "2026-08-26T12:57:49.027Z",
-  "actualizadoEn": "2026-08-26T14:22:52.584Z"
+  "actualizadoEn": "2026-08-26T15:02:31.953Z"
 }

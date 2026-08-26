@@ -65,7 +65,41 @@ export type CodigoErrorValidacion =
    * correspondencia entre ese objeto ya parseado y el archivo que lo
    * contiene.
    */
-  | "ID_NO_COINCIDE_CON_ARCHIVO";
+  | "ID_NO_COINCIDE_CON_ARCHIVO"
+  /**
+   * Agregado junto con `packages/core/src/indice/construccion.ts` (T-0018):
+   * durante el escaneo recursivo del árbol, una excepción inesperada
+   * interrumpió la lectura de un archivo puntual — no un rechazo de
+   * contenido (eso ya tiene código propio: `ESTRUCTURA_INVALIDA`/
+   * `ENCABEZADO_INVALIDO`/`ID_NO_COINCIDE_CON_ARCHIVO`), sino una falla del
+   * *intento de leer* en sí (por ejemplo, un symlink que empezó a resolver
+   * fuera del workspace entre el momento del recorrido y el momento de la
+   * lectura — carrera de archivo tocado externamente durante el escaneo,
+   * ADR-002 sección 5 punto 9). Deliberadamente no se reusa ninguno de los
+   * códigos de arriba: todos describen "el contenido de este archivo no es
+   * válido", mientras que este describe "no pudimos completar la lectura de
+   * este archivo en absoluto". La excepción puntual `NodoNoEncontrado` (el
+   * archivo desapareció entre listarlo y leerlo) es la única que NO usa este
+   * código: se trata como una carrera benigna y se ignora en silencio, no
+   * como un diagnóstico — ver el comentario de `construccion.ts`.
+   */
+  | "ERROR_DE_LECTURA"
+  /**
+   * Agregado junto con `packages/core/src/indice/vistas.ts` (T-0018,
+   * ADR-004 sección 2, "Opción de select/multi_select inexistente al
+   * momento de resolver la View"): un filtro de una View o de una query
+   * ad-hoc referencia el `id` de una opción de `select`/`multi_select` que
+   * ya no existe en `config.opciones` de la Property (por ejemplo, alguien
+   * borró la opción a mano después de crear el filtro). El ADR es explícito
+   * en que esto **no** es un error de sintaxis SQL ni rechaza la View/query
+   * completa — la condición simplemente no matchea ninguna fila — pero
+   * tampoco se puede reportar en silencio ("mismo espíritu que el checklist
+   * de ADR-002: nunca... silenciosa"). Por eso es `severidad: "advertencia"`
+   * siempre, nunca `"error"`: a diferencia de los demás códigos de esta
+   * unión (que rechazan un nodo o una View), este acompaña un resultado que
+   * de todos modos se devuelve.
+   */
+  | "FILTRO_OPCION_INEXISTENTE";
 
 /**
  * `severidad: "error"` es una violación real de una invariante (rechaza el
