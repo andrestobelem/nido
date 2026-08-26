@@ -2,12 +2,23 @@
   "id": "T-0002",
   "titulo": "Mecanismo de sync bidireccional (I2)",
   "descripcion": "Formato de archivo estable y diffable para Page/Row, resolucion de conflictos, y validacion de entrada no confiable (ids falsificados o duplicados, parent_id colgante, path traversal, arbol tocado por git fuera del motor de sync). Ver docs/02-incognitas.md I2.",
-  "estado": "pendiente",
-  "asignadoA": null,
+  "estado": "hecho",
+  "asignadoA": "Marga",
   "dependeDe": [
     "T-0001"
   ],
-  "comentarios": [],
+  "comentarios": [
+    {
+      "autor": "Nico",
+      "texto": "Entra en sprint 2, solo, por lo mismo que T-0001 en sprint 1: es el ticket que mas desbloquea (T-0009 a T-0014).",
+      "fecha": "2026-08-26T06:12:59.598Z"
+    },
+    {
+      "autor": "Marga",
+      "texto": "Formato hibrido por tipo de nodo: Page en Markdown con encabezado propio de campos fijos (no YAML general, evita RCE de motores de frontmatter y no-determinismo de js-yaml), Database y Row en JSON canonico con orden de claves fijo. CAS hashea bytes crudos del archivo en disco, nunca embebidos. Detalle completo, checklist de validacion y reglas de serializacion en docs/adr/002-formato-de-archivos-y-sync.md.",
+      "fecha": "2026-08-26T06:25:14.272Z"
+    }
+  ],
   "creadoEn": "2026-08-26T05:51:04.820Z",
-  "actualizadoEn": "2026-08-26T05:51:04.820Z"
+  "actualizadoEn": "2026-08-26T06:25:20.198Z"
 }

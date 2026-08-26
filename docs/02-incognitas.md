@@ -29,7 +29,17 @@ v1 es detectar-y-reportar el conflicto más una escritura atómica (por
 ejemplo, escribir a un archivo temporal y renombrar) — no locking
 distribuido real. Si el ADR no responde esto, no está completo.
 
-## I2 — Mecanismo concreto de sync bidireccional
+## I2 — Mecanismo concreto de sync bidireccional (resuelta)
+
+**Resuelto** en `docs/adr/002-formato-de-archivos-y-sync.md`: híbrido por
+tipo de nodo — Page en Markdown con un encabezado propio de campos fijos
+(no YAML general, para no importar sus riesgos de ejecución de código y
+no-determinismo), Database y Row en JSON canónico con orden de claves
+fijo. Fija además la serialización determinista (fechas, números,
+opcionales vs. `null`), el checklist de validación de entrada no confiable
+en cada lectura (los cuatro casos de abajo), y que el CAS de
+`docs/adr/001-persistencia.md` hashea los bytes crudos del archivo en
+disco, nunca embebidos en el propio archivo.
 
 **Pregunta**: ¿qué formato de archivo representa una Page o una Row de forma
 estable y diffable? (¿Markdown con frontmatter? ¿JSON? ¿los dos, según el
