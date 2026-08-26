@@ -14,9 +14,9 @@
 import type { HashDeContenido } from "../almacenamiento/hash.ts";
 import { escribirRow } from "../almacenamiento/escritura.ts";
 import { leerRow as leerRowAlmacenamiento, type ResultadoLectura } from "../almacenamiento/lectura.ts";
-import { tieneErroresFatales, validarRow, type ErrorValidacion } from "../invariantes.ts";
+import { tieneErroresFatales, validarFormaDeValores, validarRow, type ErrorValidacion } from "../invariantes.ts";
 import type { Database, PropertyValue, Row } from "../types.ts";
-import { RowInvalida } from "./errores.ts";
+import { RowInvalida, ValoresInvalidos } from "./errores.ts";
 import { crearConIdReintentando, pathDeRow } from "./ids.ts";
 import type { NodoRowEscrito } from "./tipos.ts";
 
@@ -25,7 +25,7 @@ export interface CrearRowInput {
   valores: PropertyValue[];
 }
 
-/** Valida `row` contra el esquema de `database`; lanza `RowInvalida` si hay algún error fatal, o devuelve las advertencias (posiblemente vacías) si no. */
+/** Valida `row` contra el esquema de `database`; lanza `RowInvalida` si hay algún error fatal, o devuelve las advertencias (posiblemente vacías) si no. Asume que `row.valores` ya tiene la forma correcta de `PropertyValue[]` — eso lo garantiza `validarFormaDeValoresOLanzar`, que siempre corre antes. */
 function validarOLanzar(database: Database, row: Row): ErrorValidacion[] {
   const errores = validarRow(database, row);
   if (tieneErroresFatales(errores)) {
@@ -34,8 +34,25 @@ function validarOLanzar(database: Database, row: Row): ErrorValidacion[] {
   return errores;
 }
 
+/**
+ * Guarda de forma ANTES de `validarOLanzar`/de cualquier I/O (ver comentario
+ * de cabecera de `validarFormaDeValores` en `../invariantes.ts`): un
+ * llamador TypeScript ya tipado siempre pasa un `PropertyValue[]` bien
+ * formado, pero nada impide que `valores` venga de `JSON.parse(...) as
+ * PropertyValue[]` (un flag de CLI/una llamada de MCP) con forma incorrecta
+ * — `validarRow` asume esta forma y no la vuelve a chequear, así que un
+ * `propertyId` faltante o un `valor` de tipo no soportado tienen que
+ * rechazarse acá, nunca colarse como huérfano silencioso o crashear un
+ * `.map`/`.some` nativo más adelante.
+ */
+function validarFormaDeValoresOLanzar(valores: unknown): void {
+  const erroresDeForma = validarFormaDeValores(valores);
+  if (erroresDeForma.length > 0) throw new ValoresInvalidos(erroresDeForma);
+}
+
 /** Genera un id, fija `creadoEn === actualizadoEn` a la hora actual, valida contra `database.propiedades` y escribe vía CAS de creación. La validación corre antes de cualquier I/O de escritura: una Row inválida nunca llega a tocar el disco. */
 export async function crearRow(raizWorkspace: string, database: Database, input: CrearRowInput): Promise<NodoRowEscrito> {
+  validarFormaDeValoresOLanzar(input.valores);
   return crearConIdReintentando(async (id) => {
     const ahora = new Date().toISOString();
     const row: Row = {
@@ -73,6 +90,7 @@ export async function actualizarRow(
   hashEsperado: HashDeContenido,
   cambios: CambiosRow,
 ): Promise<NodoRowEscrito> {
+  if (cambios.valores !== undefined) validarFormaDeValoresOLanzar(cambios.valores);
   const actualizada: Row = { ...rowActual, ...cambios, actualizadoEn: new Date().toISOString() };
   const advertencias = validarOLanzar(database, actualizada);
   const resultado = await escribirRow(raizWorkspace, pathDeRow(rowActual.id), actualizada, hashEsperado);

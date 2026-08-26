@@ -4,6 +4,8 @@ import {
   type NodoConParent,
   tieneErroresFatales,
   validarArbolContencion,
+  validarFormaDePropiedades,
+  validarFormaDeValores,
   validarIdsUnicos,
   validarRow,
   validarRowPerteneceADatabase,
@@ -387,5 +389,107 @@ describe("tieneErroresFatales", () => {
       { codigo: "TIPO_INVALIDO", mensaje: "y", severidad: "error" },
     ];
     expect(tieneErroresFatales(conFatal)).toBe(true);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Guardas de forma para Property[]/PropertyValue[] (entrada no confiable) —
+// regresión del hallazgo de revisión de T-0013: `crearDatabase`/`crearRow`
+// no validaban la FORMA de estos arrays (solo su sintaxis JSON, en la CLI),
+// así que un `--propiedades`/`--valores` sintácticamente válido pero mal
+// formado corrompía el workspace en silencio o crasheaba con un error nativo
+// críptico en vez de un error de dominio legible.
+// ---------------------------------------------------------------------------
+
+describe("validarFormaDePropiedades", () => {
+  test("pasa sin errores para un array de Property bien formado, incluyendo select con config.opciones", () => {
+    const propiedades = [
+      propTexto("p1"),
+      { id: "p2", nombre: "estado", tipo: "select", requerida: false, config: { opciones: [{ id: "o1", nombre: "uno" }] } },
+    ];
+    expect(validarFormaDePropiedades(propiedades)).toEqual([]);
+  });
+
+  test("array vacío es válido (Database sin esquema todavía)", () => {
+    expect(validarFormaDePropiedades([])).toEqual([]);
+  });
+
+  test('rechaza algo que no es un array ("propiedades" no puede ser un objeto)', () => {
+    const errores = validarFormaDePropiedades({ id: "p1" });
+    expect(codigos(errores)).toEqual(["ESTRUCTURA_INVALIDA"]);
+  });
+
+  test("rechaza un elemento sin id/nombre/requerida/tipo reconocibles, sin crashear", () => {
+    const errores = validarFormaDePropiedades([{ foo: "bar" }]);
+    expect(errores.length).toBeGreaterThan(0);
+    expect(errores.every((error) => error.codigo === "ESTRUCTURA_INVALIDA" && error.severidad === "error")).toBe(true);
+  });
+
+  test('rechaza un "tipo" que no es ninguno de los siete válidos', () => {
+    const errores = validarFormaDePropiedades([{ id: "p1", nombre: "x", requerida: false, tipo: "url" }]);
+    expect(codigos(errores)).toEqual(["ESTRUCTURA_INVALIDA"]);
+  });
+
+  test('rechaza un select sin "config.opciones" en vez de crashear más adelante contra `propiedad.config.opciones`', () => {
+    const errores = validarFormaDePropiedades([{ id: "p1", nombre: "estado", tipo: "select", requerida: false }]);
+    expect(codigos(errores)).toEqual(["ESTRUCTURA_INVALIDA"]);
+    expect(errores[0]?.propertyId).toBe("p1");
+  });
+
+  test('rechaza "config" presente en un tipo que no es select/multi_select', () => {
+    const errores = validarFormaDePropiedades([
+      { id: "p1", nombre: "x", tipo: "texto", requerida: false, config: { opciones: [] } },
+    ]);
+    expect(codigos(errores)).toEqual(["ESTRUCTURA_INVALIDA"]);
+  });
+
+  test("rechaza un id de Property duplicado dentro del mismo array de entrada", () => {
+    const errores = validarFormaDePropiedades([propTexto("p1"), propNumero("p1")]);
+    expect(codigos(errores)).toEqual(["ID_DUPLICADO"]);
+  });
+});
+
+describe("validarFormaDeValores", () => {
+  test("pasa sin errores para un array de PropertyValue bien formado", () => {
+    expect(
+      validarFormaDeValores([
+        { propertyId: "p1", valor: "hola" },
+        { propertyId: "p2", valor: 3 },
+        { propertyId: "p3", valor: true },
+        { propertyId: "p4", valor: ["a", "b"] },
+      ]),
+    ).toEqual([]);
+  });
+
+  test("array vacío es válido", () => {
+    expect(validarFormaDeValores([])).toEqual([]);
+  });
+
+  test('rechaza algo que no es un array (un objeto en vez de "valores")', () => {
+    const errores = validarFormaDeValores({ a: 1 });
+    expect(codigos(errores)).toEqual(["ESTRUCTURA_INVALIDA"]);
+  });
+
+  test('rechaza un elemento sin "propertyId" string, en vez de dejarlo pasar como huérfano silencioso', () => {
+    const errores = validarFormaDeValores([{ foo: "bar" }]);
+    expect(errores.length).toBeGreaterThan(0);
+    expect(errores.every((error) => error.codigo === "ESTRUCTURA_INVALIDA" && error.severidad === "error")).toBe(true);
+  });
+
+  test('rechaza un "valor" que no es ninguna de las cuatro formas válidas de ValorPropertyValue', () => {
+    const errores = validarFormaDeValores([{ propertyId: "p1", valor: { anidado: true } }]);
+    expect(codigos(errores)).toEqual(["ESTRUCTURA_INVALIDA"]);
+    expect(errores[0]?.propertyId).toBe("p1");
+  });
+
+  test("rechaza NaN/Infinity/-0 en valor numérico, igual que validarTipoValor", () => {
+    expect(codigos(validarFormaDeValores([{ propertyId: "p1", valor: NaN }]))).toEqual(["ESTRUCTURA_INVALIDA"]);
+    expect(codigos(validarFormaDeValores([{ propertyId: "p1", valor: Infinity }]))).toEqual(["ESTRUCTURA_INVALIDA"]);
+    expect(codigos(validarFormaDeValores([{ propertyId: "p1", valor: -0 }]))).toEqual(["ESTRUCTURA_INVALIDA"]);
+  });
+
+  test("rechaza claves inesperadas en un elemento", () => {
+    const errores = validarFormaDeValores([{ propertyId: "p1", valor: "x", extra: 1 }]);
+    expect(codigos(errores)).toEqual(["ESTRUCTURA_INVALIDA"]);
   });
 });

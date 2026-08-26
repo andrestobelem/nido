@@ -2,12 +2,18 @@
   "id": "T-0013",
   "titulo": "CLI nido",
   "descripcion": "Comandos page create/get, db create/query, etc. sobre el core, con salida JSON y humana.",
-  "estado": "en_progreso",
+  "estado": "hecho",
   "asignadoA": "Tomás",
   "dependeDe": [
     "T-0012"
   ],
-  "comentarios": [],
+  "comentarios": [
+    {
+      "autor": "Efra",
+      "texto": "Veredicto final: se aprueba — comandos CLI (page/db/row/view, mas page update por CAS) sobre @nido/core, 20 tests propios y 321/321 en el monorepo, tsc limpio.",
+      "fecha": "2026-08-26T17:43:30.472Z"
+    }
+  ],
   "creadoEn": "2026-08-26T05:52:16.000Z",
-  "actualizadoEn": "2026-08-26T16:40:23.678Z"
+  "actualizadoEn": "2026-08-26T17:43:36.134Z"
 }

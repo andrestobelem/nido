@@ -8,7 +8,7 @@
  * de ADR-002, pero la decisión de qué es fatal queda del lado del llamador.
  */
 
-import type { Database, Property, PropertyValue, Row, ValorPropertyValue } from "./types.ts";
+import type { Database, Property, PropertyValue, Row, TipoProperty, ValorPropertyValue } from "./types.ts";
 
 // ---------------------------------------------------------------------------
 // Errores estructurados
@@ -122,6 +122,196 @@ export function tieneErroresFatales(errores: ErrorValidacion[]): boolean {
 }
 
 // ---------------------------------------------------------------------------
+// Guardas de forma (entrada no confiable) para Property[]/PropertyValue[]
+//
+// Mismo espíritu que `validarFiltros`/`validarOrden` de `../indice/vistas.ts`
+// (ver el comentario de cabecera de ese módulo): un `Property[]`/
+// `PropertyValue[]` que llega desde JSON externo (CLI hoy, MCP más adelante
+// — ADR-005) es tan "entrada no confiable" como el `filtros`/`orden` de una
+// View, aunque la firma de `crearDatabase`/`crearRow`/`actualizarRow` los
+// declare con el tipo TypeScript ya validado (`Property[]`/`PropertyValue[]`)
+// — ese tipo es una promesa de compilación, no una garantía de runtime, para
+// cualquier llamador que construya el valor a partir de `JSON.parse(...) as
+// T` (exactamente lo que hace un flag de CLI). Estas dos funciones corren
+// ANTES de `validarRow`/de escribir cualquier archivo: `validarRow` (y el
+// resto de las invariantes 2/3 más abajo) asume que la forma ya es correcta
+// y no vuelve a chequearla, igual que el traductor de `../indice/vistas.ts`
+// asume que `validarFiltros`/`validarOrden` ya corrieron.
+// ---------------------------------------------------------------------------
+
+const TIPOS_PROPERTY_VALIDOS: ReadonlySet<string> = new Set<TipoProperty>([
+  "texto",
+  "numero",
+  "select",
+  "multi_select",
+  "fecha",
+  "checkbox",
+  "agente",
+]);
+
+function errorDeForma(mensaje: string, propertyId?: string): ErrorValidacion {
+  return {
+    codigo: "ESTRUCTURA_INVALIDA",
+    mensaje,
+    severidad: "error",
+    ...(propertyId !== undefined ? { propertyId } : {}),
+  };
+}
+
+/**
+ * `valor` tiene una de las cuatro formas runtime válidas de
+ * `ValorPropertyValue` — no sabe nada del tipo declarado de ninguna
+ * Property (eso es `validarTipoValor`, que ya asume esta forma). Mismo
+ * criterio defensivo con `numero` que `esNumeroValido`/`canonicalizarValor`:
+ * NaN/Infinity/-Infinity/-0 nunca son válidos, ni siquiera de forma.
+ */
+function esFormaDeValorValida(valor: unknown): valor is ValorPropertyValue {
+  if (typeof valor === "string" || typeof valor === "boolean") return true;
+  if (typeof valor === "number") return esNumeroValido(valor);
+  if (Array.isArray(valor)) return valor.every((elemento) => typeof elemento === "string");
+  return false;
+}
+
+/**
+ * Guarda de forma para el array de `PropertyValue` que reciben
+ * `crearRow`/`actualizarRow` (`../crud/row.ts`). A diferencia de
+ * `validarRow` (que cruza cada valor YA con forma correcta contra el
+ * esquema), esta función no asume nada: un elemento sin `propertyId` string,
+ * con claves de más, o con un `valor` que no es ninguna de las cuatro formas
+ * válidas, es un error fatal acá — nunca llega a convertirse en un
+ * `PROPERTY_VALUE_HUERFANO` (advertencia) ni en un crash nativo dentro de
+ * `validarRow`/el serializador.
+ */
+export function validarFormaDeValores(valoresBrutos: unknown): ErrorValidacion[] {
+  if (!Array.isArray(valoresBrutos)) {
+    return [errorDeForma(`"valores" debe ser un array, recibió ${formatearValorParaDiagnostico(valoresBrutos)}`)];
+  }
+
+  const errores: ErrorValidacion[] = [];
+  valoresBrutos.forEach((bruto, indice) => {
+    if (!esRegistro(bruto)) {
+      errores.push(errorDeForma(`el elemento ${indice} de "valores" debe ser un objeto, recibió ${formatearValorParaDiagnostico(bruto)}`));
+      return;
+    }
+    const clavesInesperadas = Object.keys(bruto).filter((clave) => clave !== "propertyId" && clave !== "valor");
+    if (clavesInesperadas.length > 0) {
+      errores.push(errorDeForma(`el elemento ${indice} de "valores" tiene claves inesperadas: ${clavesInesperadas.join(", ")}`));
+    }
+    if (typeof bruto.propertyId !== "string") {
+      errores.push(
+        errorDeForma(
+          `el elemento ${indice} de "valores" tiene "propertyId" inválido (debe ser string), recibió ${formatearValorParaDiagnostico(bruto.propertyId)}`,
+        ),
+      );
+      return;
+    }
+    if (!("valor" in bruto) || !esFormaDeValorValida(bruto.valor)) {
+      errores.push(
+        errorDeForma(
+          `el elemento ${indice} de "valores" (property "${bruto.propertyId}") tiene "valor" inválido: ${formatearValorParaDiagnostico(bruto.valor)}`,
+          bruto.propertyId,
+        ),
+      );
+    }
+  });
+  return errores;
+}
+
+function validarFormaDeOpcion(bruto: unknown, contexto: string, propertyId: string | undefined): ErrorValidacion[] {
+  if (!esRegistro(bruto)) {
+    return [errorDeForma(`${contexto} debe ser un objeto, recibió ${formatearValorParaDiagnostico(bruto)}`, propertyId)];
+  }
+  const errores: ErrorValidacion[] = [];
+  const clavesInesperadas = Object.keys(bruto).filter((clave) => clave !== "id" && clave !== "nombre");
+  if (clavesInesperadas.length > 0) {
+    errores.push(errorDeForma(`${contexto} tiene claves inesperadas: ${clavesInesperadas.join(", ")}`, propertyId));
+  }
+  if (typeof bruto.id !== "string") {
+    errores.push(errorDeForma(`${contexto} tiene "id" inválido (debe ser string)`, propertyId));
+  }
+  if (typeof bruto.nombre !== "string") {
+    errores.push(errorDeForma(`${contexto} tiene "nombre" inválido (debe ser string)`, propertyId));
+  }
+  return errores;
+}
+
+/**
+ * Guarda de forma para el array de `Property` que recibe `crearDatabase`
+ * (`../crud/database.ts`). Valida cada elemento contra la unión discriminada
+ * de `Property` (`./types.ts`) tratando la entrada como `unknown` — mismo
+ * motivo que `validarFormaDeValores`. Incluye el chequeo de `id` duplicado
+ * DENTRO del array de entrada (reusando `validarIdsUnicos`, más abajo en
+ * este archivo): un esquema inicial con dos Property del mismo id nunca es
+ * válido, sin importar si la Database ya tiene Rows — eso es ortogonal a lo
+ * que decide `agregarProperty`/ADR-006 para una Property agregada después.
+ */
+export function validarFormaDePropiedades(propiedadesBrutas: unknown): ErrorValidacion[] {
+  if (!Array.isArray(propiedadesBrutas)) {
+    return [errorDeForma(`"propiedades" debe ser un array, recibió ${formatearValorParaDiagnostico(propiedadesBrutas)}`)];
+  }
+
+  const errores: ErrorValidacion[] = [];
+  const idsConFormaValida: { id: string }[] = [];
+
+  propiedadesBrutas.forEach((bruto, indice) => {
+    if (!esRegistro(bruto)) {
+      errores.push(errorDeForma(`la property en la posición ${indice} debe ser un objeto, recibió ${formatearValorParaDiagnostico(bruto)}`));
+      return;
+    }
+    const propertyId = typeof bruto.id === "string" ? bruto.id : undefined;
+    if (propertyId === undefined) {
+      errores.push(errorDeForma(`la property en la posición ${indice} tiene "id" inválido (debe ser string)`));
+    } else {
+      idsConFormaValida.push({ id: propertyId });
+    }
+    const etiqueta = `la property en la posición ${indice}${propertyId !== undefined ? ` ("${propertyId}")` : ""}`;
+
+    if (typeof bruto.nombre !== "string") {
+      errores.push(errorDeForma(`${etiqueta} tiene "nombre" inválido (debe ser string)`, propertyId));
+    }
+    if (typeof bruto.requerida !== "boolean") {
+      errores.push(errorDeForma(`${etiqueta} tiene "requerida" inválido (debe ser boolean)`, propertyId));
+    }
+    if (typeof bruto.tipo !== "string" || !TIPOS_PROPERTY_VALIDOS.has(bruto.tipo)) {
+      errores.push(
+        errorDeForma(
+          `${etiqueta} tiene "tipo" inválido: ${formatearValorParaDiagnostico(bruto.tipo)} — válidos: ${[...TIPOS_PROPERTY_VALIDOS].join(", ")}`,
+          propertyId,
+        ),
+      );
+      return; // sin un "tipo" reconocido no se puede seguir validando "config"
+    }
+
+    const esSelect = bruto.tipo === "select" || bruto.tipo === "multi_select";
+    const clavesPermitidas = new Set(["id", "nombre", "requerida", "tipo", ...(esSelect ? ["config"] : [])]);
+    const clavesInesperadas = Object.keys(bruto).filter((clave) => !clavesPermitidas.has(clave));
+    if (clavesInesperadas.length > 0) {
+      errores.push(errorDeForma(`${etiqueta} tiene claves inesperadas: ${clavesInesperadas.join(", ")}`, propertyId));
+    }
+
+    // Un "config" presente en un tipo que no es select/multi_select ya cae
+    // en `clavesInesperadas` arriba (no está en `clavesPermitidas` para ese
+    // tipo) — no se repite el chequeo acá para no duplicar el mismo error.
+    if (esSelect) {
+      if (!esRegistro(bruto.config) || !Array.isArray(bruto.config.opciones)) {
+        errores.push(errorDeForma(`${etiqueta} (${bruto.tipo}) requiere "config.opciones" (array)`, propertyId));
+      } else {
+        const clavesConfig = Object.keys(bruto.config).filter((clave) => clave !== "opciones");
+        if (clavesConfig.length > 0) {
+          errores.push(errorDeForma(`${etiqueta} tiene claves inesperadas en "config": ${clavesConfig.join(", ")}`, propertyId));
+        }
+        bruto.config.opciones.forEach((opcion: unknown, indiceOpcion: number) => {
+          errores.push(...validarFormaDeOpcion(opcion, `${etiqueta}, la opción en la posición ${indiceOpcion} de "config.opciones"`, propertyId));
+        });
+      }
+    }
+  });
+
+  errores.push(...validarIdsUnicos(idsConFormaValida));
+  return errores;
+}
+
+// ---------------------------------------------------------------------------
 // Invariantes 2 y 3: PropertyValue de una Row contra el esquema de su Database
 // ---------------------------------------------------------------------------
 
@@ -151,6 +341,17 @@ function formatearValorParaDiagnostico(valor: unknown): string {
     if (Object.is(valor, -0)) return "-0";
   }
   return JSON.stringify(valor);
+}
+
+/**
+ * Mismo helper que `../formato/database-row.ts`/`../indice/vistas.ts`
+ * (duplicado a propósito, no importado: cada módulo trata su propia
+ * frontera de entrada no confiable de forma independiente — ver el
+ * comentario de cabecera de `../formato/database-row.ts` sobre por qué
+ * `formatearValorParaDiagnostico` también se duplica en vez de compartirse).
+ */
+function esRegistro(valor: unknown): valor is Record<string, unknown> {
+  return typeof valor === "object" && valor !== null && !Array.isArray(valor);
 }
 
 function errorTipoInvalido(propiedad: Property, mensaje: string): ErrorValidacion {

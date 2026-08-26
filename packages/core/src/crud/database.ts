@@ -80,6 +80,7 @@ import { resolverPathConfinado } from "../almacenamiento/confinamiento.ts";
 import { hashDeArchivo, hashesIguales, type HashDeContenido } from "../almacenamiento/hash.ts";
 import { leerDatabase as leerDatabaseAlmacenamiento, type ResultadoLectura } from "../almacenamiento/lectura.ts";
 import { listarFilasCrudasDeDatabase } from "../indice/construccion.ts";
+import { validarFormaDePropiedades } from "../invariantes.ts";
 import type { Database, Property, View } from "../types.ts";
 import {
   CambiosDatabaseInvalidos,
@@ -88,6 +89,7 @@ import {
   PropertyIdDuplicado,
   PropertyNoEncontrada,
   PropertyRequeridaRechazada,
+  PropiedadesInvalidas,
   type RowFaltante,
 } from "./errores.ts";
 import { crearConIdReintentando, pathDeDatabase } from "./ids.ts";
@@ -102,6 +104,16 @@ export interface CrearDatabaseInput {
 }
 
 export async function crearDatabase(raizWorkspace: string, input: CrearDatabaseInput): Promise<NodoEscrito<Database>> {
+  const propiedades = input.propiedades ?? [];
+  // Guarda de forma ANTES de reservar un id o escribir nada (ver comentario
+  // de cabecera de `validarFormaDePropiedades` en `../invariantes.ts`): un
+  // llamador TypeScript ya tipado siempre pasa esto, pero nada impide que
+  // `input.propiedades` venga de `JSON.parse(...) as Property[]` (un flag de
+  // CLI/una llamada de MCP) con forma incorrecta aunque el JSON en sí sea
+  // sintácticamente válido.
+  const erroresDeForma = validarFormaDePropiedades(propiedades);
+  if (erroresDeForma.length > 0) throw new PropiedadesInvalidas(erroresDeForma);
+
   return crearConIdReintentando(async (id) => {
     const ahora = new Date().toISOString();
     const database: Database = {
@@ -110,7 +122,7 @@ export async function crearDatabase(raizWorkspace: string, input: CrearDatabaseI
       parentId: input.parentId,
       titulo: input.titulo,
       ...(input.cuerpo !== undefined ? { cuerpo: input.cuerpo } : {}),
-      propiedades: input.propiedades ?? [],
+      propiedades,
       vistas: input.vistas ?? [],
       creadoEn: ahora,
       actualizadoEn: ahora,

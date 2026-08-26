@@ -93,11 +93,47 @@ export class PropertyIdDuplicado extends Error {
   }
 }
 
+/**
+ * `crearDatabase`: `propiedades` no tiene una forma válida de `Property[]`
+ * — ver `validarFormaDePropiedades` en `../invariantes.ts`. Mismo motivo que
+ * `ValoresInvalidos`: se lanza antes de reservar un id o escribir cualquier
+ * archivo, para una entrada que ni siquiera tiene la forma de esquema que
+ * el resto del CRUD (`agregarProperty`/`promoverPropertyARequerida`/
+ * `quitarProperty`) asume.
+ */
+export class PropiedadesInvalidas extends Error {
+  readonly errores: ErrorValidacion[];
+  constructor(errores: ErrorValidacion[]) {
+    super(`"propiedades" no tiene una forma válida: ${errores.map((error) => error.mensaje).join("; ")}`);
+    this.errores = errores;
+  }
+}
+
 /** `crearRow`/`actualizarRow`: la Row resultante tiene al menos un error fatal contra el esquema de su Database (invariantes 2/3) — no se escribe nada. */
 export class RowInvalida extends Error {
   readonly errores: ErrorValidacion[];
   constructor(rowId: string, errores: ErrorValidacion[]) {
     super(`la Row "${rowId}" no es válida contra el esquema de su Database: ${errores.map((error) => error.mensaje).join("; ")}`);
+    this.errores = errores;
+  }
+}
+
+/**
+ * `crearRow`/`actualizarRow`: `valores` no tiene una forma válida de
+ * `PropertyValue[]` — ver `validarFormaDeValores` en `../invariantes.ts`.
+ * Se lanza ANTES de intentar cualquier validación de esquema (`RowInvalida`)
+ * o de reservar un id/escribir un archivo: a diferencia de `RowInvalida`
+ * (que asume una Row ya bien formada y la rechaza por su CONTENIDO contra
+ * el esquema), esta clase cubre el caso previo — la entrada ni siquiera
+ * tiene la FORMA de un `PropertyValue[]` (falta `propertyId`, `valor` de un
+ * tipo no soportado, un array/objeto donde no corresponde, etc.) —
+ * exactamente lo que puede llegar de un flag de CLI/una llamada de MCP con
+ * JSON sintácticamente válido pero de forma incorrecta.
+ */
+export class ValoresInvalidos extends Error {
+  readonly errores: ErrorValidacion[];
+  constructor(errores: ErrorValidacion[]) {
+    super(`"valores" no tiene una forma válida: ${errores.map((error) => error.mensaje).join("; ")}`);
     this.errores = errores;
   }
 }

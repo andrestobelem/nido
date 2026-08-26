@@ -11,7 +11,7 @@ import { join } from "node:path";
 import { ConflictoDeEscritura } from "../src/almacenamiento/escritura.ts";
 import { esErrorDeLectura } from "../src/almacenamiento/lectura.ts";
 import { actualizarDatabase, crearDatabase, leerDatabase, type CambiosDatabase } from "../src/crud/database.ts";
-import { CambiosDatabaseInvalidos } from "../src/crud/errores.ts";
+import { CambiosDatabaseInvalidos, PropiedadesInvalidas } from "../src/crud/errores.ts";
 import { crearRow } from "../src/crud/row.ts";
 import type { Property } from "../src/types.ts";
 
@@ -50,6 +50,25 @@ describe("crud/database: crear + leer", () => {
     expect(creada.valor.propiedades).toEqual([]);
     expect(creada.valor.vistas).toEqual([]);
     expect(creada.valor.cuerpo).toBeUndefined();
+  });
+
+  // Regresión del hallazgo de revisión de T-0013: `propiedades` con forma
+  // incorrecta (JSON sintácticamente válido, pero no un `Property[]` real —
+  // exactamente lo que puede llegar de `--propiedades` en la CLI) se
+  // rechazaba en silencio y corrompía el workspace para siempre, en vez de
+  // fallar antes de escribir nada.
+  test("crear con propiedades de forma inválida se rechaza con PropiedadesInvalidas, sin escribir ningún archivo", async () => {
+    const propiedadesRotas = [{ foo: "bar" }] as unknown as Property[];
+    await expect(
+      crearDatabase(raiz, { titulo: "corrupta", parentId: null, propiedades: propiedadesRotas }),
+    ).rejects.toBeInstanceOf(PropiedadesInvalidas);
+  });
+
+  test("crear con un select sin config.opciones se rechaza, en vez de persistir un esquema que crashea en el próximo uso", async () => {
+    const selectRoto = [{ id: "p1", nombre: "estado", tipo: "select", requerida: false }] as unknown as Property[];
+    await expect(
+      crearDatabase(raiz, { titulo: "corrupta", parentId: null, propiedades: selectRoto }),
+    ).rejects.toBeInstanceOf(PropiedadesInvalidas);
   });
 });
 

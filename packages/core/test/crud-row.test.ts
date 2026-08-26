@@ -9,9 +9,9 @@ import { join } from "node:path";
 import { ConflictoDeEscritura } from "../src/almacenamiento/escritura.ts";
 import { esErrorDeLectura } from "../src/almacenamiento/lectura.ts";
 import { crearDatabase } from "../src/crud/database.ts";
-import { RowInvalida } from "../src/crud/errores.ts";
+import { RowInvalida, ValoresInvalidos } from "../src/crud/errores.ts";
 import { actualizarRow, crearRow, leerRow } from "../src/crud/row.ts";
-import type { Property } from "../src/types.ts";
+import type { Property, PropertyValue } from "../src/types.ts";
 
 let raiz: string;
 
@@ -43,6 +43,24 @@ describe("crud/row: crear + leer", () => {
   test("crear una Row sin valor para una property requerida se rechaza, sin escribir nada", async () => {
     const db = await crearDatabase(raiz, { titulo: "db", parentId: null, propiedades: [propTexto("p1", true)] });
     await expect(crearRow(raiz, db.valor, { titulo: "incompleta", valores: [] })).rejects.toBeInstanceOf(RowInvalida);
+  });
+
+  // Regresión del hallazgo de revisión de T-0013: `valores` con forma
+  // incorrecta (JSON sintácticamente válido, pero no un `PropertyValue[]`
+  // real — exactamente lo que puede llegar de `--valores` en la CLI) o bien
+  // crasheaba dentro de `validarRow` con un error nativo críptico, o colaba
+  // un `propertyId` inválido como "advertencia" de huérfano en vez de
+  // rechazarse.
+  test('crear con "valores" que no es un array se rechaza con ValoresInvalidos, en vez de crashear en validarRow', async () => {
+    const db = await crearDatabase(raiz, { titulo: "db", parentId: null, propiedades: [propTexto("p1")] });
+    const valoresRotos = { a: 1 } as unknown as PropertyValue[];
+    await expect(crearRow(raiz, db.valor, { titulo: "x", valores: valoresRotos })).rejects.toBeInstanceOf(ValoresInvalidos);
+  });
+
+  test('crear con un elemento de "valores" sin propertyId se rechaza, en vez de colarse como advertencia de huérfano', async () => {
+    const db = await crearDatabase(raiz, { titulo: "db", parentId: null, propiedades: [propTexto("p1")] });
+    const valoresRotos = [{ foo: "bar" }] as unknown as PropertyValue[];
+    await expect(crearRow(raiz, db.valor, { titulo: "x", valores: valoresRotos })).rejects.toBeInstanceOf(ValoresInvalidos);
   });
 });
 
@@ -79,6 +97,20 @@ describe("crud/row: actualizar respeta CAS", () => {
     const fila = await crearRow(raiz, db.valor, { titulo: "fila", valores: [{ propertyId: "p1", valor: "x" }] });
 
     await expect(actualizarRow(raiz, db.valor, fila.valor, fila.hash, { valores: [] })).rejects.toBeInstanceOf(RowInvalida);
+
+    const leida = await leerRow(raiz, db.valor, fila.valor.id);
+    if (esErrorDeLectura(leida)) throw new Error("no debería fallar");
+    expect(leida.valor.valores).toEqual([{ propertyId: "p1", valor: "x" }]); // sin cambios
+  });
+
+  test('actualizar con "valores" de forma inválida se rechaza con ValoresInvalidos, sin tocar el archivo', async () => {
+    const db = await crearDatabase(raiz, { titulo: "db", parentId: null, propiedades: [propTexto("p1")] });
+    const fila = await crearRow(raiz, db.valor, { titulo: "fila", valores: [{ propertyId: "p1", valor: "x" }] });
+
+    const valoresRotos = [{ foo: "bar" }] as unknown as PropertyValue[];
+    await expect(
+      actualizarRow(raiz, db.valor, fila.valor, fila.hash, { valores: valoresRotos }),
+    ).rejects.toBeInstanceOf(ValoresInvalidos);
 
     const leida = await leerRow(raiz, db.valor, fila.valor.id);
     if (esErrorDeLectura(leida)) throw new Error("no debería fallar");
