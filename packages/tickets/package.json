@@ -1,0 +1,12 @@
+{
+  "name": "@nido/tickets",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "bin": {
+    "tickets": "./src/cli.ts"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  }
+}
