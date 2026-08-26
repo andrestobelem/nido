@@ -2,7 +2,7 @@
   "id": "T-0009",
   "titulo": "Formalizar el modelo de dominio en tipos",
   "descripcion": "Traducir docs/01-modelo-dominio.md a tipos TypeScript concretos, incluyendo la decision de migracion de esquema (I9).",
-  "estado": "en_progreso",
+  "estado": "hecho",
   "asignadoA": "Marga",
   "dependeDe": [
     "T-0001",
@@ -15,8 +15,13 @@
       "autor": "Nico",
       "texto": "Entra en sprint 4, solo: primer ticket que produce codigo real de nido. Revision adversarial de Efra antes de cerrar, no en paralelo (nueva regla de proceso desde retro de sprint 1).",
       "fecha": "2026-08-26T06:41:02.258Z"
+    },
+    {
+      "autor": "Efra",
+      "texto": "Revision adversarial en 2 rondas: la primera encontro 4 hallazgos reales (PropertyValue duplicado no detectado, Database.cuerpo mal tipado como obligatorio, orden de View sin soporte de campos base, mensajes de diagnostico que mentian con NaN/Infinity/-0 via JSON.stringify), los 4 corregidos y verificados. Segunda ronda: listo para hecho. 2 ambiguedades de spec no bloqueantes anotadas (fecha con calendario invalido, combinacion huerfano+duplicado) para que el equipo las confirme a proposito mas adelante.",
+      "fecha": "2026-08-26T07:08:28.019Z"
     }
   ],
   "creadoEn": "2026-08-26T05:51:51.405Z",
-  "actualizadoEn": "2026-08-26T06:41:02.258Z"
+  "actualizadoEn": "2026-08-26T07:08:28.035Z"
 }
