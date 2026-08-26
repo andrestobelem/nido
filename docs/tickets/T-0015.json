@@ -1,0 +1,13 @@
+{
+  "id": "T-0015",
+  "titulo": "Serializador de Page (Markdown + encabezado propio)",
+  "descripcion": "Parser y serializador canonico del formato de Page segun ADR-002 seccion 2: encabezado de 6 campos fijos delimitado por ---, sin motor YAML general. Round-trip determinista.",
+  "estado": "en_progreso",
+  "asignadoA": "Tomás",
+  "dependeDe": [
+    "T-0009"
+  ],
+  "comentarios": [],
+  "creadoEn": "2026-08-26T12:57:48.355Z",
+  "actualizadoEn": "2026-08-26T12:58:26.383Z"
+}

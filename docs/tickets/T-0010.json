@@ -5,9 +5,10 @@
   "estado": "pendiente",
   "asignadoA": null,
   "dependeDe": [
-    "T-0009"
+    "T-0009",
+    "T-0019"
   ],
   "comentarios": [],
   "creadoEn": "2026-08-26T05:51:57.360Z",
-  "actualizadoEn": "2026-08-26T05:51:57.360Z"
+  "actualizadoEn": "2026-08-26T12:58:00.740Z"
 }

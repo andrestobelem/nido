@@ -1,0 +1,13 @@
+{
+  "id": "T-0016",
+  "titulo": "Serializador canonico de Database y Row (JSON)",
+  "descripcion": "Parser y serializador canonico JSON de Database y Row segun ADR-002 seccion 3: orden de claves fijo, reglas de valor por tipo (fechas opacas, numero sin NaN/Infinity/-0, multi_select ordenado y deduplicado, opcionales ausentes vs null).",
+  "estado": "en_progreso",
+  "asignadoA": "Tomás",
+  "dependeDe": [
+    "T-0009"
+  ],
+  "comentarios": [],
+  "creadoEn": "2026-08-26T12:57:48.567Z",
+  "actualizadoEn": "2026-08-26T12:58:26.507Z"
+}

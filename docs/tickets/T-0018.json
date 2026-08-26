@@ -1,0 +1,11 @@
+{
+  "id": "T-0018",
+  "titulo": "Indice derivado en bun:sqlite",
+  "descripcion": "Construir/reconstruir el indice desde los archivos del arbol (ADR-001): nunca fuente de verdad, siempre reconstruible. Resolver Views contra el indice via WHERE/ORDER BY, traduciendo el arbol Grupo/CondicionHoja de ADR-004 (profundidad 2, operadores por familia de tipo) a SQL.",
+  "estado": "pendiente",
+  "asignadoA": null,
+  "dependeDe": [],
+  "comentarios": [],
+  "creadoEn": "2026-08-26T12:57:49.027Z",
+  "actualizadoEn": "2026-08-26T12:57:49.027Z"
+}
