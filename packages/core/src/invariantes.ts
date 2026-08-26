@@ -21,7 +21,34 @@ export type CodigoErrorValidacion =
   | "TIPO_INVALIDO"
   | "CICLO_EN_CONTENCION"
   | "ID_DUPLICADO"
-  | "PARENT_ID_INVALIDO";
+  | "PARENT_ID_INVALIDO"
+  /**
+   * Agregado junto con `packages/core/src/formato/page.ts`: el encabezado
+   * de un archivo de Page (ADR-002 sección 2) no matchea su grammar fijo —
+   * delimitador `---` faltante, clave ausente/repetida/desconocida, o un
+   * valor que no cumple el patrón esperado para su clave. Es una categoría
+   * de error distinta de las siete anteriores: esas describen una violación
+   * de invariante de dominio sobre un objeto *ya parseado*; esta describe
+   * que el parseo mismo del *formato de archivo* falló, antes de que exista
+   * un objeto sobre el que evaluar ninguna invariante. Ninguno de los
+   * códigos existentes representa eso, así que reusar uno habría sido
+   * impreciso en vez de simplificar.
+   */
+  | "ENCABEZADO_INVALIDO"
+  /**
+   * Agregado junto con `packages/core/src/formato/database-row.ts` (T-0016):
+   * el mismo caso que `ENCABEZADO_INVALIDO`, pero para el formato JSON de
+   * Database/Row en vez del encabezado propio de Page — `JSON.parse` falló,
+   * o el objeto resultante no tiene exactamente las claves y tipos que
+   * ADR-002 sección 3 fija para ese tipo de nodo. No se reusa
+   * `ENCABEZADO_INVALIDO` porque ese nombre está atado específicamente al
+   * "encabezado" de Page (ADR-002 sección 2, un formato de texto propio,
+   * no JSON); no se reusa `TIPO_INVALIDO` por la misma razón que motivó
+   * agregar `ENCABEZADO_INVALIDO` en primer lugar: esa describe un
+   * `PropertyValue` cuyo tipo no coincide con el de su `Property` en un
+   * objeto ya parseado, no un fallo de parseo del formato de archivo en sí.
+   */
+  | "ESTRUCTURA_INVALIDA";
 
 /**
  * `severidad: "error"` es una violación real de una invariante (rechaza el

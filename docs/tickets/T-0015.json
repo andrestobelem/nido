@@ -2,12 +2,18 @@
   "id": "T-0015",
   "titulo": "Serializador de Page (Markdown + encabezado propio)",
   "descripcion": "Parser y serializador canonico del formato de Page segun ADR-002 seccion 2: encabezado de 6 campos fijos delimitado por ---, sin motor YAML general. Round-trip determinista.",
-  "estado": "en_progreso",
+  "estado": "hecho",
   "asignadoA": "Tomás",
   "dependeDe": [
     "T-0009"
   ],
-  "comentarios": [],
+  "comentarios": [
+    {
+      "autor": "Efra",
+      "texto": "Revision final: implementacion cumple ADR-002 seccion 2 (encabezado de 6 claves fijas, parseo total no tolerante, sin motor YAML general); 38/38 tests del modulo (122/122 en packages/core) y tsc --noEmit en verde - aprobado en el tercer intento, tras 2 rondas con hallazgos ya corregidos (chequeo de salto de linea faltante primero en id/parent_id, despues en creado_en/actualizado_en).",
+      "fecha": "2026-08-26T13:38:40.482Z"
+    }
+  ],
   "creadoEn": "2026-08-26T12:57:48.355Z",
-  "actualizadoEn": "2026-08-26T12:58:26.383Z"
+  "actualizadoEn": "2026-08-26T13:38:46.639Z"
 }

@@ -2,12 +2,18 @@
   "id": "T-0016",
   "titulo": "Serializador canonico de Database y Row (JSON)",
   "descripcion": "Parser y serializador canonico JSON de Database y Row segun ADR-002 seccion 3: orden de claves fijo, reglas de valor por tipo (fechas opacas, numero sin NaN/Infinity/-0, multi_select ordenado y deduplicado, opcionales ausentes vs null).",
-  "estado": "en_progreso",
+  "estado": "hecho",
   "asignadoA": "Tomás",
   "dependeDe": [
     "T-0009"
   ],
-  "comentarios": [],
+  "comentarios": [
+    {
+      "autor": "Efra",
+      "texto": "Revision final: implementacion cumple ADR-002 seccion 3 (orden de claves, fechas opacas, numero sin NaN/Infinity/-0, multi_select ordenado y deduplicado, opcionales ausente-vs-null); 51/51 tests del modulo (120/120 en packages/core) y tsc --noEmit en verde - aprobado en el primer intento, sin correcciones necesarias.",
+      "fecha": "2026-08-26T13:29:45.177Z"
+    }
+  ],
   "creadoEn": "2026-08-26T12:57:48.567Z",
-  "actualizadoEn": "2026-08-26T12:58:26.507Z"
+  "actualizadoEn": "2026-08-26T13:29:51.127Z"
 }

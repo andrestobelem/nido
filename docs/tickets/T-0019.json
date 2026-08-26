@@ -10,7 +10,13 @@
     "T-0017",
     "T-0018"
   ],
-  "comentarios": [],
+  "comentarios": [
+    {
+      "autor": "Efra",
+      "texto": "Nota de T-0016: el serializador actual de Database no canonicaliza el orden interno de claves de cada Property/View (preserva el orden de memoria). Es una ambiguedad honesta de ADR-002 (la regla de canonicalizacion solo enumera Database/Row explicitamente), pero puede generar diffs espurios en actualizaciones parciales de esquema. Confirmar a proposito si T-0019 necesita canonicalizar Property/View tambien, o si queda para un ticket futuro.",
+      "fecha": "2026-08-26T13:39:40.400Z"
+    }
+  ],
   "creadoEn": "2026-08-26T12:58:00.678Z",
-  "actualizadoEn": "2026-08-26T12:58:00.678Z"
+  "actualizadoEn": "2026-08-26T13:39:40.400Z"
 }
