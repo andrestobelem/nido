@@ -2,10 +2,16 @@
   "id": "T-0005",
   "titulo": "Expresividad de las Views (I5)",
   "descripcion": "Que operadores de filtro (igualdad, comparacion, contiene, AND/OR) y si las Views se persisten con nombre propio o son siempre ad-hoc.",
-  "estado": "en_progreso",
+  "estado": "hecho",
   "asignadoA": "Efra",
   "dependeDe": [],
-  "comentarios": [],
+  "comentarios": [
+    {
+      "autor": "Efra",
+      "texto": "Resuelto en docs/adr/004-expresividad-de-views.md (ADR completo). Decisión: (1) operadores agrupados por familia de tipo (escalar_comparable, texto, checkbox, select, multi_select) mas vacio/no_vacio unario con semantica ausente-o-vacio explicita; (2) combinacion AND/OR con agrupacion acotada a profundidad 2 (no arbitraria) - el costo real de traduccion a SQL no esta en AND vs OR (ambos son gratis una vez que cada hoja es una expresion booleana) sino en la familia de tipo (escalar en tabla EAV vs multi_select via EXISTS/join) y en el manejo explicito de NULL/ausencia para operadores negativos (evita el bug clasico de logica de tres valores de SQL); (3) View con nombre persiste en el archivo de su Database (ya fijado por 01-modelo-dominio.md/ADR-001, no reabierto) Y coexiste con query ad-hoc por flags de CLI que no toca ese archivo (evita forzar escritura+CAS por cada consulta exploratoria) - ambas comparten el mismo validador/traductor via JSON inline, sin gramatica de CLI separada. Tambien fija: INSTR en vez de LIKE para contiene (evita escapar wildcards), granularidad de invalidez a nivel de View individual (no tumba toda la Database), y deja explicitamente fuera de alcance I9 (property_id removido) y coleccion natural de select/texto. Ver seccion 'PROPUESTA PARA docs/01-modelo-dominio.md' en la respuesta final para el texto exacto a fusionar en el campo filtros de View.",
+      "fecha": "2026-08-26T06:36:12.893Z"
+    }
+  ],
   "creadoEn": "2026-08-26T05:51:26.512Z",
-  "actualizadoEn": "2026-08-26T06:27:56.348Z"
+  "actualizadoEn": "2026-08-26T06:36:12.907Z"
 }

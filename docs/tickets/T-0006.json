@@ -2,10 +2,16 @@
   "id": "T-0006",
   "titulo": "Forma del core compartido entre CLI y MCP (I6)",
   "descripcion": "Confirmar que CLI y MCP llaman a la misma libreria TS en proceso, y definir los limites exactos de esa libreria.",
-  "estado": "en_progreso",
+  "estado": "hecho",
   "asignadoA": "Tomás",
   "dependeDe": [],
-  "comentarios": [],
+  "comentarios": [
+    {
+      "autor": "Tomás",
+      "texto": "Resuelto en docs/adr/005-core-compartido-cli-mcp.md: core TS en proceso (packages/core), CLI y futuro MCP lo importan directamente, el MCP nunca envuelve subprocesos de la CLI. Limites exactos documentados (que expone: Workspace/Page/Database+Property/Row/View incluida resolucion de View y reconstruccion del indice; que NO expone: parsing de argv, formato humano/JSON, cualquier cosa de terminal o de transporte MCP). Propuesta de texto para docs/02-incognitas.md incluida en mi respuesta final, sin tocar el archivo compartido.",
+      "fecha": "2026-08-26T06:31:53.439Z"
+    }
+  ],
   "creadoEn": "2026-08-26T05:51:32.572Z",
-  "actualizadoEn": "2026-08-26T06:27:56.376Z"
+  "actualizadoEn": "2026-08-26T06:31:53.453Z"
 }

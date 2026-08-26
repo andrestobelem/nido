@@ -62,27 +62,59 @@ confiable, porque el árbol del repo puede llegar a cualquier estado vía
 
 ## I3 — (fusionada con I1, ver arriba)
 
-## I4 — Subconjunto de tipos de Property
+## I4 — Subconjunto de tipos de Property (resuelta)
 
-**Pregunta**: de los ~15 tipos de propiedad de Notion, ¿cuáles aportan valor
-real a un consumidor agente? La propuesta inicial en
+**Resuelto** en `docs/adr/003-tipos-de-property.md`: se confirma el
+subconjunto de siete tipos sin cambios (texto, numero, select,
+multi_select, fecha, checkbox, agente — `relación` ya estaba diferida a v2
+por T-0003). No se agrega ningún tipo de los ~15 de Notion evaluados y no
+propuestos (url/email/phone, status, created_time/created_by/
+last_edited_time/last_edited_by, formula/rollup, files/media): cada uno se
+resuelve con lo que ya existe (texto, campos de Page, autoría de git) o
+comparte el mismo riesgo de sync bidireccional que ya aplazó `relación`.
+
+**Pregunta original**: de los ~15 tipos de propiedad de Notion, ¿cuáles
+aportan valor real a un consumidor agente? La propuesta inicial en
 `docs/01-modelo-dominio.md` (texto, número, select, multi_select, fecha,
-checkbox, relación, agente) es un punto de partida, no una decisión cerrada.
+checkbox, relación, agente) es un punto de partida, no una decisión
+cerrada.
 
-## I5 — Expresividad de las Views
+## I5 — Expresividad de las Views (resuelta)
 
-**Pregunta**: ¿qué operadores de filtro hacen falta (igualdad, comparación,
-contiene, vacío/no-vacío)? ¿Se combinan solo con AND, o también con OR y
-agrupación? ¿Una View se persiste con nombre propio, o es siempre una query
-ad-hoc que se pasa por flags de la CLI?
+**Resuelto** en `docs/adr/004-expresividad-de-views.md`: operadores
+agrupados por familia de tipo (escalar_comparable, texto, checkbox,
+select, multi_select) más `vacio`/`no_vacio` universal; combinación AND/OR
+con agrupación acotada a profundidad 2 (no arbitraria — el costo real de
+traducción a SQL está en la familia de tipo y en el manejo de NULL por
+operador, no en AND vs OR); View con nombre persiste en el archivo de su
+Database (ya fijado por `docs/01-modelo-dominio.md`/ADR-001) y coexiste
+con query ad-hoc por flags de CLI, ambas sobre el mismo validador/traductor.
 
-## I6 — Forma del core compartido entre CLI y MCP
+**Pregunta original**: ¿qué operadores de filtro hacen falta (igualdad,
+comparación, contiene, vacío/no-vacío)? ¿Se combinan solo con AND, o
+también con OR y agrupación? ¿Una View se persiste con nombre propio, o es
+siempre una query ad-hoc que se pasa por flags de la CLI?
 
-**Pregunta**: la misión dice que CLI y MCP "comparten el mismo core". ¿Eso
-significa una librería TypeScript en proceso, invocada por ambas
-superficies? ¿O el MCP envuelve subprocesos de la CLI? La primera opción
-parece more alineada con "sin estado" y con evitar reimplementar lógica, pero
-falta decidir los límites exactos del core (qué expone, qué no).
+## I6 — Forma del core compartido entre CLI y MCP (resuelta)
+
+**Resuelto** en `docs/adr/005-core-compartido-cli-mcp.md`: el core es una
+librería TypeScript en proceso (`packages/core`), invocada directamente por
+la CLI y por el futuro servidor MCP — el MCP nunca envuelve subprocesos de
+la CLI. El core expone operaciones tipadas sobre Workspace, Page, Database
+(incluyendo el esquema de Property), Row y View (creación, lectura,
+actualización, borrado, y resolución de View vía el índice de
+`docs/adr/001-persistencia.md`, más reconstrucción explícita del índice); no
+expone parsing de argv, la decisión entre salida humana o JSON, códigos de
+salida de proceso, ni nada específico de terminal o de transporte MCP — eso
+vive exclusivamente en la capa CLI (`packages/cli`) y, en su momento, en la
+capa MCP (`packages/mcp`).
+
+**Pregunta original**: la misión dice que CLI y MCP "comparten el mismo
+core". ¿Eso significa una librería TypeScript en proceso, invocada por
+ambas superficies? ¿O el MCP envuelve subprocesos de la CLI? La primera
+opción parece más alineada con "sin estado" y con evitar reimplementar
+lógica, pero faltaba decidir los límites exactos del core (qué expone, qué
+no).
 
 ## I7 — Formato mínimo de ADR y su aprobación (resuelta)
 
@@ -90,26 +122,44 @@ falta decidir los límites exactos del core (qué expone, qué no).
 falta esperar a un ticket de research: era una decisión de minutos que
 bloqueaba escribir el primer ADR de fondo (I1).
 
-## I8 — Heurística de priorización del coordinador
+## I8 — Heurística de priorización del coordinador (resuelta)
 
-**Pregunta**: el Paso 4 describe un coordinador que "destraba y prioriza"
-sin implementar. ¿Con qué regla concreta decide qué ticket sigue? ("el más
-antiguo sin bloqueos", "el que más tickets desbloquea", "el que el PM marcó
-como foco del sprint"...) Sin una heurística explícita, "mirar el tablero y
-decidir" no es reproducible entre corridas del coordinador.
+**Resuelto** en `docs/coordinador.md` (no es una decisión de arquitectura
+de nido, por eso no tiene ADR propio): candidatos son los tickets
+`pendiente`/`bloqueado` con todas sus dependencias en `hecho`; entre esos,
+gana el que más tickets desbloquea transitivamente; el empate se rompe por
+`creadoEn` ascendente y, como último fallback, por `id`. Si no hay
+candidatos, reporta el cuello de botella en vez de no decir nada.
 
-## I9 — Migración de esquema en una Database con filas
+**Pregunta original**: el Paso 4 describe un coordinador que "destraba y
+prioriza" sin implementar. ¿Con qué regla concreta decide qué ticket
+sigue? Sin una heurística explícita, "mirar el tablero y decidir" no es
+reproducible entre corridas del coordinador.
 
-**Pregunta**: la invariante 2 de `docs/01-modelo-dominio.md` exige que toda
-Row tenga un `PropertyValue` por cada Property requerida de su Database.
-¿Qué pasa cuando se agrega una Property requerida a una Database que ya
-tiene Rows? Por definición, esas Rows existentes violan la invariante en el
-instante en que se agrega la columna. Hace falta una regla: ¿se rellenan
-con un valor por defecto, la Property nueva no puede ser requerida si la
-Database ya tiene filas, o se marca la Database entera como inconsistente
-hasta que se resuelva a mano? Lo mismo aplica, en menor medida, a quitar una
-Property: ¿qué pasa con los `PropertyValue` que quedan huérfanos?
+## I9 — Migración de esquema en una Database con filas (resuelta)
+
+**Resuelto** en `docs/adr/006-migracion-de-esquema.md`: agregar una
+Property requerida a una Database que ya tiene Rows se rechaza
+explícitamente (nunca se degrada en silencio a no-requerida); el camino
+es agregarla como no-requerida y usar una operación explícita "promover a
+requerida" que solo tiene éxito si todas las Rows ya tienen valor — si
+falta alguna, falla sin tocar el esquema y reporta cuáles. Si la Database
+no tiene Rows, se puede agregar directamente como requerida. Quitar una
+Property nunca falla y nunca borra en silencio: los `PropertyValue`
+huérfanos (y las referencias huérfanas de una View) quedan en el archivo,
+excluidos de validación e índice, hasta una operación explícita de
+limpieza (`purge-orphans`). Ambas rutas de escritura de esquema quedan
+como una sola escritura CAS sobre el archivo de la Database (ADR-001),
+nunca como una reescritura de conjunto sobre N Rows.
+
+**Pregunta original**: la invariante 2 de `docs/01-modelo-dominio.md` exige
+que toda Row tenga un `PropertyValue` por cada Property requerida de su
+Database. ¿Qué pasa cuando se agrega una Property requerida a una
+Database que ya tiene Rows? Por definición, esas Rows existentes violan
+la invariante en el instante en que se agrega la columna. Lo mismo
+aplica, en menor medida, a quitar una Property: ¿qué pasa con los
+`PropertyValue` que quedan huérfanos?
 
 Surgida de la revisión adversarial del plan
-(`docs/sprints/00-revision-plan.md`). Bloquea formalizar el modelo en tipos
-(paso 8 de `docs/03-plan.md`), no bloquea el ADR de persistencia.
+(`docs/sprints/00-revision-plan.md`). Bloqueaba formalizar el modelo en
+tipos (paso 8 de `docs/03-plan.md`), no bloqueaba el ADR de persistencia.

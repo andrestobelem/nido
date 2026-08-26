@@ -2,10 +2,16 @@
   "id": "T-0008",
   "titulo": "Migracion de esquema en Database con filas (I9)",
   "descripcion": "Que pasa con las Rows existentes al agregar o quitar una Property requerida de una Database. Ver docs/02-incognitas.md I9.",
-  "estado": "en_progreso",
+  "estado": "hecho",
   "asignadoA": "Marga",
   "dependeDe": [],
-  "comentarios": [],
+  "comentarios": [
+    {
+      "autor": "Marga",
+      "texto": "Resuelto en docs/adr/006-migracion-de-esquema.md. Regla: agregar una Property requerida a una Database con Rows existentes se rechaza explícitamente (no se degrada en silencio); el camino es agregar como no-requerida y usar una operación explícita 'promover a requerida' que solo confirma si TODAS las Rows ya tienen valor (si no, falla sin tocar el esquema y lista qué Rows faltan). Quitar una Property nunca falla y nunca borra nada: los PropertyValue huérfanos (y las referencias huérfanas en Views) quedan en el archivo, excluidos de validación e índice, hasta una operación explícita de limpieza (purge-orphans). Ambas rutas de escritura de esquema son un solo CAS de un archivo (la Database), preservando la atomicidad por archivo de ADR-001/002. Propuestas de texto para docs/01-modelo-dominio.md y docs/02-incognitas.md entregadas en mi respuesta final, no aplicadas por mí directamente (regla del sprint).",
+      "fecha": "2026-08-26T06:34:10.898Z"
+    }
+  ],
   "creadoEn": "2026-08-26T05:51:44.680Z",
-  "actualizadoEn": "2026-08-26T06:27:56.431Z"
+  "actualizadoEn": "2026-08-26T06:34:13.514Z"
 }

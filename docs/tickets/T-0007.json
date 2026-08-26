@@ -2,10 +2,16 @@
   "id": "T-0007",
   "titulo": "Heuristica de priorizacion del coordinador (I8)",
   "descripcion": "Regla explicita y reproducible con la que el coordinador de Paso 4 decide que ticket sigue.",
-  "estado": "en_progreso",
+  "estado": "hecho",
   "asignadoA": "Nico",
   "dependeDe": [],
-  "comentarios": [],
+  "comentarios": [
+    {
+      "autor": "Nico",
+      "texto": "Heuristica definida en docs/coordinador.md (no ADR, confirmado en docs/sprints/03-planning.md). Regla: candidatos = tickets pendiente/bloqueado con TODAS sus dependencias en hecho (un bloqueado con deps resueltas se destraba a pendiente); entre candidatos gana el que mas tickets desbloquea transitivamente (sucesores en el grafo dependeDe); empate por creadoEn ascendente, luego id ascendente. Si no hay candidatos, reporta el cuello de botella entre los en_progreso/en_revision en vez de elegir uno nuevo. Validado contra el backlog real: en el snapshot de sprint 3 planning la regla elige T-0004 (empatado con T-0008 en puntaje 6, gana por ser mas viejo), igual que el foco real que tomo el equipo. En el backlog de hoy no hay candidatos listos (T-0009..T-0014 siguen esperando a T-0004/T-0008 en curso, ambos de Marga) - ese es el cuello de botella a reportar.",
+      "fecha": "2026-08-26T06:33:33.562Z"
+    }
+  ],
   "creadoEn": "2026-08-26T05:51:38.158Z",
-  "actualizadoEn": "2026-08-26T06:27:56.405Z"
+  "actualizadoEn": "2026-08-26T06:33:39.133Z"
 }

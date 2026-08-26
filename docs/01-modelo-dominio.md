@@ -82,17 +82,25 @@ Consulta guardada sobre una Database.
   Database, no como archivo propio.
 - `nombre`
 - `database_id`
-- `filtros`: condiciones sobre Property (igualdad, comparación, contiene,
-  combinables con AND/OR — expresividad exacta a definir, ver incógnita
-  correspondiente).
+- `filtros`: `Grupo | null` (expresividad fijada en `docs/adr/004-expresividad-de-views.md`).
+  Un `Grupo` es `{ combinador: "y" | "o", condiciones: (CondicionHoja | Grupo)[] }`,
+  con anidamiento acotado a profundidad 2 (un `Grupo` puede contener otro `Grupo`
+  como hijo, pero ese hijo solo puede contener condiciones hoja). `null` significa
+  "sin filtro, todas las filas". Cada `CondicionHoja` referencia una Property o un
+  campo base (`titulo`, `id`, `creado_en`, `actualizado_en`) y usa el operador que
+  corresponda a la familia de tipo de ese campo (`escalar_comparable`, `texto`,
+  `checkbox`, `select`, `multi_select`) — detalle completo de operadores por
+  familia en el ADR citado.
 - `orden`: lista de `(property_id, direccion)`, para permitir orden
   multi-campo.
 - `columnas_visibles`: subconjunto de Property a mostrar (opcional).
 
-## Tipos de Property soportados (propuesta inicial)
+## Tipos de Property soportados
 
 Notion tiene ~15 tipos de propiedad. No todos aportan valor a un consumidor
-agente. Propuesta de subconjunto v1, a confirmar como incógnita de diseño:
+agente. **Confirmado en Sprint 3** (T-0004, `docs/adr/003-tipos-de-property.md`):
+el subconjunto v1 queda cerrado en estos siete, sin agregar ni quitar
+ninguno respecto de la propuesta inicial:
 
 - `texto`
 - `numero`
@@ -104,12 +112,22 @@ agente. Propuesta de subconjunto v1, a confirmar como incógnita de diseño:
 - `checkbox`
 - `agente`: identifica al agente dueño o asignado a un valor. En v1 es un
   **string identificador simple** (el nombre o id del agente), no una
-  entidad `Agent` con esquema propio. No hace falta más que eso: nido no
-  tiene autenticación ni perfiles de agente, y no-objetivo de multiusuario
-  humano tampoco lo exige. Si en el futuro hace falta más que un
-  identificador (por ejemplo, capacidades o historial de un agente), se
-  promueve a una entidad propia; hasta entonces, esta es una decisión
-  explícita, no un vacío del modelo.
+  entidad `Agent` con esquema propio, y de un solo valor (no lista). No
+  hace falta más que eso: nido no tiene autenticación ni perfiles de
+  agente, y no-objetivo de multiusuario humano tampoco lo exige. Si en el
+  futuro hace falta más que un identificador (por ejemplo, capacidades o
+  historial de un agente) o más de un agente por valor, se promueve a una
+  entidad propia o a lista; hasta entonces, esta es una decisión explícita,
+  no un vacío del modelo.
+
+Tipos evaluados y descartados explícitamente para v1 (razones y
+alternativas completas en el ADR): `url`/`email`/`phone` (se resuelven
+como `texto`, sin ganancia real sobre él en un consumidor CLI/JSON),
+`status` (duplica `select` sin la ventaja de presentación visual que lo
+justifica en Notion), `created_time`/`created_by`/`last_edited_time`/
+`last_edited_by` (ya cubiertos por `creado_en`/`actualizado_en` de Page y
+por autoría de git), `formula`/`rollup` y `files`/`media` (mismo criterio
+de riesgo para el ciclo de sync bidireccional que aplazó `relacion` a v2).
 
 ### Diferido a v2: `relacion`
 
@@ -126,12 +144,41 @@ entre bases, y `relacion` sigue siendo la parte de mayor riesgo para el
 primer ciclo de sync bidireccional. Revertirlo queda abierto para v2, una
 vez que el core y la sync de v1 estén probados.
 
+## Migración de esquema
+
+Agregar o quitar una Property de una Database con Rows existentes está
+resuelto en `docs/adr/006-migracion-de-esquema.md` (I9). Regla resumida:
+
+- Agregar una Property **requerida** a una Database que ya tiene Rows se
+  rechaza explícitamente. El camino es agregar como no-requerida, poblar
+  cada Row con su valor real, y después usar una operación explícita de
+  **promoción** que solo tiene éxito si todas las Rows ya tienen valor —
+  si no, falla sin tocar el esquema y reporta cuáles faltan. Si la
+  Database no tiene ninguna Row, agregar directamente como requerida es
+  válido.
+- Quitar una Property nunca falla y nunca borra los `PropertyValue` que
+  queden huérfanos (ni las referencias huérfanas de una View): quedan en
+  el archivo, excluidos de validación e índice, hasta una operación
+  explícita de limpieza.
+
+Ambas operaciones de esquema se resuelven como una sola escritura sobre el
+archivo de la Database — nunca como una reescritura de conjunto sobre N
+Rows a la vez.
+
 ## Invariantes
 
 1. Toda Row pertenece a exactamente una Database (su `parent_id`).
 2. El conjunto de `PropertyValue` de una Row corresponde 1:1 al esquema de su
    Database: ni faltan valores para propiedades requeridas, ni hay valores
    para propiedades que no existen en el esquema.
+
+   *(Aclaración, ADR-006: esta invariante describe el estado objetivo de una
+   Row "limpia". Durante una migración de esquema puede haber, de forma
+   temporal y explícitamente rastreada, `PropertyValue` huérfanos —
+   referencian una Property que ya no está en el esquema tras un `quitar` —
+   que no rechazan la Row entera y quedan excluidos de validación/índice
+   hasta una limpieza explícita. Ver "Migración de esquema" más arriba y
+   `docs/adr/006-migracion-de-esquema.md`.)*
 3. El tipo de cada `PropertyValue` coincide con el tipo declarado de su
    `Property`.
 4. Una Page que no es Row no tiene `PropertyValue` estructurado en v1: su
@@ -180,3 +227,10 @@ vez que el core y la sync de v1 estén probados.
   bidireccional dentro del archivo de su Database.
 - **v1.2** (Sprint 1, T-0003): se confirmó el recorte de `relacion` a v2 —
   ver nota en la sección correspondiente.
+- **v1.3** (Sprint 3, T-0004, T-0005, T-0008): se confirmó el subconjunto
+  de siete tipos de Property sin cambios (`docs/adr/003-tipos-de-property.md`);
+  se fijó la expresividad de las Views — operadores por familia de tipo,
+  combinación AND/OR con agrupación acotada a profundidad 2
+  (`docs/adr/004-expresividad-de-views.md`); y se resolvió la migración de
+  esquema — agregar Property requerida vía promoción explícita, quitar sin
+  borrar huérfanos en silencio (`docs/adr/006-migracion-de-esquema.md`).

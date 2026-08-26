@@ -2,12 +2,18 @@
   "id": "T-0004",
   "titulo": "Subconjunto de tipos de Property (I4)",
   "descripcion": "Confirmar que tipos de Property (texto, numero, select, multi_select, fecha, checkbox, agente) aportan valor real. Depende de si se confirma o revierte el recorte de relacion.",
-  "estado": "en_progreso",
+  "estado": "hecho",
   "asignadoA": "Marga",
   "dependeDe": [
     "T-0003"
   ],
-  "comentarios": [],
+  "comentarios": [
+    {
+      "autor": "Marga",
+      "texto": "Confirmado subconjunto de 7 tipos sin cambios (texto, numero, select, multi_select, fecha, checkbox, agente). No se agrega ningun tipo de los evaluados (url/email/phone, status, created_time/created_by/last_edited_time/last_edited_by, formula/rollup, files/media) — cada uno se resuelve con lo que ya existe o comparte el riesgo que aplazo relacion a v2. Decision completa con alternativas en docs/adr/003-tipos-de-property.md. Propuesta de texto para docs/01-modelo-dominio.md y docs/02-incognitas.md entregada en la respuesta del ticket, no aplicada aun (regla del sprint).",
+      "fecha": "2026-08-26T06:32:21.369Z"
+    }
+  ],
   "creadoEn": "2026-08-26T05:51:20.411Z",
-  "actualizadoEn": "2026-08-26T06:27:56.319Z"
+  "actualizadoEn": "2026-08-26T06:32:26.933Z"
 }
