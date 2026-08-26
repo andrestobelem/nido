@@ -2,10 +2,10 @@
   "id": "T-0007",
   "titulo": "Heuristica de priorizacion del coordinador (I8)",
   "descripcion": "Regla explicita y reproducible con la que el coordinador de Paso 4 decide que ticket sigue.",
-  "estado": "pendiente",
-  "asignadoA": null,
+  "estado": "en_progreso",
+  "asignadoA": "Nico",
   "dependeDe": [],
   "comentarios": [],
   "creadoEn": "2026-08-26T05:51:38.158Z",
-  "actualizadoEn": "2026-08-26T05:51:38.158Z"
+  "actualizadoEn": "2026-08-26T06:27:56.405Z"
 }

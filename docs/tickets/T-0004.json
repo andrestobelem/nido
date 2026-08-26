@@ -2,12 +2,12 @@
   "id": "T-0004",
   "titulo": "Subconjunto de tipos de Property (I4)",
   "descripcion": "Confirmar que tipos de Property (texto, numero, select, multi_select, fecha, checkbox, agente) aportan valor real. Depende de si se confirma o revierte el recorte de relacion.",
-  "estado": "pendiente",
-  "asignadoA": null,
+  "estado": "en_progreso",
+  "asignadoA": "Marga",
   "dependeDe": [
     "T-0003"
   ],
   "comentarios": [],
   "creadoEn": "2026-08-26T05:51:20.411Z",
-  "actualizadoEn": "2026-08-26T05:51:20.411Z"
+  "actualizadoEn": "2026-08-26T06:27:56.319Z"
 }

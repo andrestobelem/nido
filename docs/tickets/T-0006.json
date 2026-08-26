@@ -2,10 +2,10 @@
   "id": "T-0006",
   "titulo": "Forma del core compartido entre CLI y MCP (I6)",
   "descripcion": "Confirmar que CLI y MCP llaman a la misma libreria TS en proceso, y definir los limites exactos de esa libreria.",
-  "estado": "pendiente",
-  "asignadoA": null,
+  "estado": "en_progreso",
+  "asignadoA": "Tomás",
   "dependeDe": [],
   "comentarios": [],
   "creadoEn": "2026-08-26T05:51:32.572Z",
-  "actualizadoEn": "2026-08-26T05:51:32.572Z"
+  "actualizadoEn": "2026-08-26T06:27:56.376Z"
 }
