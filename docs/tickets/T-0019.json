@@ -2,8 +2,8 @@
   "id": "T-0019",
   "titulo": "CRUD de alto nivel del core + migracion de esquema",
   "descripcion": "Integra T-0015 a T-0018 en operaciones CRUD reales sobre Workspace/Page/Database/Row/View, mas la migracion de esquema de ADR-006 (agregar Property requerida via promocion explicita, quitar sin borrar huerfanos).",
-  "estado": "pendiente",
-  "asignadoA": null,
+  "estado": "en_progreso",
+  "asignadoA": "Tomás",
   "dependeDe": [
     "T-0015",
     "T-0016",
@@ -18,5 +18,5 @@
     }
   ],
   "creadoEn": "2026-08-26T12:58:00.678Z",
-  "actualizadoEn": "2026-08-26T13:39:40.400Z"
+  "actualizadoEn": "2026-08-26T15:04:34.389Z"
 }
