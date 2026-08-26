@@ -1,0 +1,11 @@
+{
+  "id": "T-0005",
+  "titulo": "Expresividad de las Views (I5)",
+  "descripcion": "Que operadores de filtro (igualdad, comparacion, contiene, AND/OR) y si las Views se persisten con nombre propio o son siempre ad-hoc.",
+  "estado": "pendiente",
+  "asignadoA": null,
+  "dependeDe": [],
+  "comentarios": [],
+  "creadoEn": "2026-08-26T05:51:26.512Z",
+  "actualizadoEn": "2026-08-26T05:51:26.512Z"
+}

@@ -1,0 +1,11 @@
+{
+  "id": "T-0008",
+  "titulo": "Migracion de esquema en Database con filas (I9)",
+  "descripcion": "Que pasa con las Rows existentes al agregar o quitar una Property requerida de una Database. Ver docs/02-incognitas.md I9.",
+  "estado": "pendiente",
+  "asignadoA": null,
+  "dependeDe": [],
+  "comentarios": [],
+  "creadoEn": "2026-08-26T05:51:44.680Z",
+  "actualizadoEn": "2026-08-26T05:51:44.680Z"
+}

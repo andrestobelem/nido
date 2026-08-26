@@ -1,0 +1,22 @@
+{
+  "id": "T-0003",
+  "titulo": "Confirmar o revertir el recorte de 'relacion' a v2",
+  "descripcion": "docs/01-modelo-dominio.md sacó el tipo de Property 'relacion' del v1 real por decision de alcance. Confirmarlo o revertirlo es trabajo del primer sprint, no una decision unilateral de Paso 0.",
+  "estado": "hecho",
+  "asignadoA": "Lucía",
+  "dependeDe": [],
+  "comentarios": [
+    {
+      "autor": "Nico",
+      "texto": "Entra en sprint 1 en paralelo con T-0001. No depende de la decision de persistencia.",
+      "fecha": "2026-08-26T05:52:30.096Z"
+    },
+    {
+      "autor": "Lucía",
+      "texto": "Confirmado: se mantiene relacion diferida a v2. El criterio de exito de la mision no exige relaciones entre bases y es la parte de mayor riesgo para el primer ciclo de sync. Documentado en docs/01-modelo-dominio.md v1.2.",
+      "fecha": "2026-08-26T05:53:51.781Z"
+    }
+  ],
+  "creadoEn": "2026-08-26T05:51:12.481Z",
+  "actualizadoEn": "2026-08-26T05:53:51.794Z"
+}

@@ -1,0 +1,16 @@
+{
+  "id": "T-0009",
+  "titulo": "Formalizar el modelo de dominio en tipos",
+  "descripcion": "Traducir docs/01-modelo-dominio.md a tipos TypeScript concretos, incluyendo la decision de migracion de esquema (I9).",
+  "estado": "pendiente",
+  "asignadoA": null,
+  "dependeDe": [
+    "T-0001",
+    "T-0002",
+    "T-0004",
+    "T-0008"
+  ],
+  "comentarios": [],
+  "creadoEn": "2026-08-26T05:51:51.405Z",
+  "actualizadoEn": "2026-08-26T05:51:51.405Z"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "T-0013",
+  "titulo": "CLI nido",
+  "descripcion": "Comandos page create/get, db create/query, etc. sobre el core, con salida JSON y humana.",
+  "estado": "pendiente",
+  "asignadoA": null,
+  "dependeDe": [
+    "T-0012"
+  ],
+  "comentarios": [],
+  "creadoEn": "2026-08-26T05:52:16.000Z",
+  "actualizadoEn": "2026-08-26T05:52:16.000Z"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "T-0012",
+  "titulo": "Implementar sincronizacion bidireccional",
+  "descripcion": "Implementacion concreta contra los criterios del gate de round-trip.",
+  "estado": "pendiente",
+  "asignadoA": null,
+  "dependeDe": [
+    "T-0011"
+  ],
+  "comentarios": [],
+  "creadoEn": "2026-08-26T05:52:09.935Z",
+  "actualizadoEn": "2026-08-26T05:52:09.935Z"
+}

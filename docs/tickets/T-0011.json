@@ -1,0 +1,13 @@
+{
+  "id": "T-0011",
+  "titulo": "Gate de aceptacion de round-trip",
+  "descripcion": "Criterios ejecutables con bun test de que significa sync sin perdida, con casos de escritura concurrente y de archivo borrado, y politica de conflicto declarada. Debe pasar antes de implementar la sync de verdad.",
+  "estado": "pendiente",
+  "asignadoA": null,
+  "dependeDe": [
+    "T-0010"
+  ],
+  "comentarios": [],
+  "creadoEn": "2026-08-26T05:52:03.783Z",
+  "actualizadoEn": "2026-08-26T05:52:03.783Z"
+}

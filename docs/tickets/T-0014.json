@@ -1,0 +1,13 @@
+{
+  "id": "T-0014",
+  "titulo": "Servidor MCP sobre el core de nido",
+  "descripcion": "Exponer el mismo core como servidor MCP sin estado, una vez que la CLI este estable.",
+  "estado": "pendiente",
+  "asignadoA": null,
+  "dependeDe": [
+    "T-0013"
+  ],
+  "comentarios": [],
+  "creadoEn": "2026-08-26T05:52:21.393Z",
+  "actualizadoEn": "2026-08-26T05:52:21.393Z"
+}

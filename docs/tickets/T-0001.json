@@ -1,0 +1,22 @@
+{
+  "id": "T-0001",
+  "titulo": "ADR de persistencia (I1 + I3)",
+  "descripcion": "Decidir git-as-db vs SQLite vs archivos planos + indice. Debe declarar como criterio de aceptacion explicito la garantia de atomicidad entre agentes concurrentes. Ver docs/02-incognitas.md I1 y docs/sprints/00-revision-plan.md.",
+  "estado": "hecho",
+  "asignadoA": "Marga",
+  "dependeDe": [],
+  "comentarios": [
+    {
+      "autor": "Nico",
+      "texto": "Entra en sprint 1. Es el ADR mas bloqueante del plan: desbloquea I2, I9 y el resto de la cadena de construccion.",
+      "fecha": "2026-08-26T05:52:30.083Z"
+    },
+    {
+      "autor": "Marga",
+      "texto": "Decision: archivos planos versionados en git como unica fuente de verdad + indice derivado en bun:sqlite (reconstruible, nunca fuente de verdad) para resolver Views. Atomicidad: CAS por archivo (hash/mtime) + write-then-rename, deteccion-y-reporte de conflicto, sin locking distribuido. Ver docs/adr/001-persistencia.md.",
+      "fecha": "2026-08-26T06:03:01.569Z"
+    }
+  ],
+  "creadoEn": "2026-08-26T05:50:52.522Z",
+  "actualizadoEn": "2026-08-26T06:03:06.279Z"
+}

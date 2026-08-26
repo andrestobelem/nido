@@ -1,0 +1,13 @@
+{
+  "id": "T-0002",
+  "titulo": "Mecanismo de sync bidireccional (I2)",
+  "descripcion": "Formato de archivo estable y diffable para Page/Row, resolucion de conflictos, y validacion de entrada no confiable (ids falsificados o duplicados, parent_id colgante, path traversal, arbol tocado por git fuera del motor de sync). Ver docs/02-incognitas.md I2.",
+  "estado": "pendiente",
+  "asignadoA": null,
+  "dependeDe": [
+    "T-0001"
+  ],
+  "comentarios": [],
+  "creadoEn": "2026-08-26T05:51:04.820Z",
+  "actualizadoEn": "2026-08-26T05:51:04.820Z"
+}
