@@ -48,7 +48,24 @@ export type CodigoErrorValidacion =
    * `PropertyValue` cuyo tipo no coincide con el de su `Property` en un
    * objeto ya parseado, no un fallo de parseo del formato de archivo en sí.
    */
-  | "ESTRUCTURA_INVALIDA";
+  | "ESTRUCTURA_INVALIDA"
+  /**
+   * Agregado junto con `packages/core/src/almacenamiento/lectura.ts`
+   * (T-0017): checklist de ADR-002 sección 5, punto 4 ("consistencia
+   * id-vs-filename", cierra *id falsificado*) — el `id` que declara el
+   * contenido ya parseado de un archivo no coincide con el id derivado de su
+   * nombre de archivo (`<id>.md`/`<id>.json` sin extensión).
+   *
+   * No es `ID_DUPLICADO`: ese código es la unicidad de id *entre archivos
+   * distintos* (punto 5 del mismo checklist, fuera de alcance de T-0017
+   * porque necesita conocer todo el árbol, no un archivo aislado). Tampoco es
+   * `ESTRUCTURA_INVALIDA`/`ENCABEZADO_INVALIDO`: esos describen que el
+   * parseo del formato de archivo en sí falló; acá el parseo tuvo éxito y el
+   * objeto resultante es válido en sí mismo — lo que falla es la
+   * correspondencia entre ese objeto ya parseado y el archivo que lo
+   * contiene.
+   */
+  | "ID_NO_COINCIDE_CON_ARCHIVO";
 
 /**
  * `severidad: "error"` es una violación real de una invariante (rechaza el

@@ -5,7 +5,13 @@
   "estado": "pendiente",
   "asignadoA": null,
   "dependeDe": [],
-  "comentarios": [],
+  "comentarios": [
+    {
+      "autor": "Efra",
+      "texto": "Notas de T-0017 para tener en cuenta: (1) un symlink circular en confinamiento.ts escapa como Error crudo con code ELOOP en vez de un tipo tipado (severidad baja, no es bypass de seguridad). (2) escritura.ts autocrea subdirectorios no declarados del path temporal en silencio (Bun.write lo hace por defecto) - no viola ningun ADR pero puede enmascarar un path mal construido. Ninguno bloqueante, confirmar si el indice necesita blindarse contra esto.",
+      "fecha": "2026-08-26T14:22:08.992Z"
+    }
+  ],
   "creadoEn": "2026-08-26T12:57:49.027Z",
-  "actualizadoEn": "2026-08-26T12:57:49.027Z"
+  "actualizadoEn": "2026-08-26T14:22:08.992Z"
 }

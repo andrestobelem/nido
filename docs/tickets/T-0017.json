@@ -2,10 +2,16 @@
   "id": "T-0017",
   "titulo": "Motor de escritura con CAS por archivo",
   "descripcion": "Escritura atomica temp+rename, con CAS via Bun.hash() de bytes crudos (ADR-002 seccion 4): capturar hash al leer, comparar antes de confirmar, abortar y reportar conflicto si cambio. Mas el checklist de validacion de un archivo individual al leer (ADR-002 seccion 5, puntos 1-4 y 8: confinamiento de path, parseo total no tolerante, forma/esquema exacto, consistencia id-vs-filename, validacion de tipo por PropertyValue).",
-  "estado": "en_progreso",
+  "estado": "hecho",
   "asignadoA": "Marga",
   "dependeDe": [],
-  "comentarios": [],
+  "comentarios": [
+    {
+      "autor": "Efra",
+      "texto": "Revision final en verde: 198/198 tests de la suite (44 de almacenamiento) y 0/300 dobles-exito en fuzzing de escritores concurrentes; hicieron falta 2 intentos - la primera version de escribirConCas sin lock por archivo permitia doble-exito bajo CAS concurrente, la segunda (con conLockDeArchivo en el camino de actualizacion) lo cierra.",
+      "fecha": "2026-08-26T14:21:01.415Z"
+    }
+  ],
   "creadoEn": "2026-08-26T12:57:48.923Z",
-  "actualizadoEn": "2026-08-26T13:40:27.146Z"
+  "actualizadoEn": "2026-08-26T14:21:07.258Z"
 }
